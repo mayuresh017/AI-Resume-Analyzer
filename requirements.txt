@@ -1,0 +1,10 @@
+Flask
+pdfplumber
+python-docx
+scikit-learn
+gunicorn
+requests
+python-dotenv
+reportlab
+firebase-admin
+python-dotenv

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="page page-home">
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <div class="top-actions">
+          <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+        </div>
+        <span class="eyebrow">Create Account</span>
+        <h1>Start using Resume Analyzer</h1>
+        <p>Create your account with Firebase Authentication.</p>
+      </div>
+
+      <div class="form-card">
+        <div class="card-heading">
+          <h2>Register</h2>
+          <p>Create a new account</p>
+        </div>
+
+        <form id="registerForm">
+          <label>Name</label>
+          <input type="text" id="name" required>
+
+          <label>Email</label>
+          <input type="email" id="email" required>
+
+          <label>Password</label>
+          <input type="password" id="password" required>
+
+          <button type="submit" class="liquid-btn">
+    <span>Register</span>
+</button>
+        </form>
+
+        <p style="margin-top:16px;">
+          Already have an account?
+          <a href="/login">Login</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "{{ firebase_config.apiKey }}",
+      authDomain: "{{ firebase_config.authDomain }}",
+      projectId: "{{ firebase_config.projectId }}",
+      storageBucket: "{{ firebase_config.storageBucket }}",
+      messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+      appId: "{{ firebase_config.appId }}"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(userCredential.user, { displayName: name });
+
+        const idToken = await userCredential.user.getIdToken();
+
+        await fetch("/session-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken })
+        });
+
+        await fetch("/save-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: userCredential.user.uid,
+            name,
+            email
+          })
+        });
+
+        window.location.href = "/";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

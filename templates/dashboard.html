@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        .score {
+            font-size: 22px;
+            color: #22c55e;
+        }
+
+        .date {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Your Resume History</h1>
+
+        {% for item in history %}
+        <div class="card">
+            <h3>{{ item.filename }}</h3>
+            <p class="score">ATS Score: {{ item.score }}</p>
+            <p>Missing: {{ item.missing_keywords }}</p>
+            <p class="date">{{ item.created_at }}</p>
+        </div>
+        {% endfor %}
+
+        {% if not history %}
+        <p>No history yet</p>
+        {% endif %}
+    </div>
+</body>
+</html>

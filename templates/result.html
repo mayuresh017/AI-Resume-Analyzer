@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer Result</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <main class="page page-result">
+        <section class="top-actions">
+            <span class="user-name">👋 {{ user_name }}</span>
+
+            <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+
+            <form action="/download-report" method="POST" class="download-form">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <input type="hidden" name="score" value="{{ result.score }}">
+                <input type="hidden" name="matched_keywords" value="{{ result.matched_keywords | join(', ') }}">
+                <input type="hidden" name="missing_keywords" value="{{ result.missing_keywords | join(', ') }}">
+                <input type="hidden" name="found_skills" value="{{ result.found_skills | join(', ') }}">
+                <input type="hidden" name="suggestions" value="{{ result.suggestions | join('||') }}">
+                <input type="hidden" name="ai_feedback" value="{{ result.ai_feedback }}">
+                <button type="submit" class="liquid-btn success">
+    <span>Download Report</span>
+</button>
+            </form>
+
+            <a href="/logout" class="liquid-btn danger">
+    <span>Logout</span>
+</a>
+        </section>
+
+        <section class="result-hero card glass">
+            <div>
+                <span class="eyebrow">Analysis Complete</span>
+                <h1>{{ result.score_label }}</h1>
+                <p class="muted">Resume file: <strong>{{ filename }}</strong></p>
+            </div>
+
+            <div class="score-ring-wrap">
+                <div class="score-ring" style="--score: {{ result.score }};">
+                    <div class="score-ring-inner">
+                        <strong>{{ result.score }}%</strong>
+                        <span>ATS Score</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="metric-strip">
+            <div class="metric-card">
+                <span>Keyword Match</span>
+                <strong>{{ result.matched_percent }}%</strong>
+            </div>
+            <div class="metric-card">
+                <span>Skills Detected</span>
+                <strong>{{ result.found_skills|length }}</strong>
+            </div>
+            <div class="metric-card">
+                <span>Sections Found</span>
+                <strong>{{ result.sections.values()|select|list|length }}/{{ result.sections|length }}</strong>
+            </div>
+            <div class="metric-card">
+                <span>Action Verbs</span>
+                <strong>{{ result.action_verbs|length }}</strong>
+            </div>
+        </section>
+
+        <section class="result-grid">
+            <article class="card">
+                <h2>Matched Keywords</h2>
+                {% if result.matched_keywords %}
+                    <div class="chips">
+                        {% for word in result.matched_keywords %}
+                            <span class="chip success">{{ word }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="muted">No strong keyword matches found yet.</p>
+                {% endif %}
+            </article>
+
+            <article class="card">
+                <h2>Missing Keywords</h2>
+                {% if result.missing_keywords %}
+                    <div class="chips">
+                        {% for word in result.missing_keywords %}
+                            <span class="chip danger">{{ word }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="muted">No major missing keywords detected.</p>
+                {% endif %}
+            </article>
+
+            <article class="card">
+                <h2>Strengths</h2>
+                <ul class="stack-list">
+                    {% for item in result.strengths %}
+                        <li>{{ item }}</li>
+                    {% else %}
+                        <li>More job-specific alignment is needed to highlight strengths clearly.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="card">
+                <h2>Sections Found</h2>
+                <ul class="status-list">
+                    {% for section, found in result.sections.items() %}
+                        <li>
+                            <span>{{ section }}</span>
+                            <strong class="badge {{ 'badge-success' if found else 'badge-danger' }}">{{ 'Found' if found else 'Missing' }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="card full-width">
+                <h2>Skills Detected</h2>
+                {% if result.found_skills %}
+                    <div class="chips">
+                        {% for skill in result.found_skills %}
+                            <span class="chip">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="muted">No common skills detected from the current list.</p>
+                {% endif %}
+            </article>
+
+            <article class="card full-width">
+                <h2>Suggestions</h2>
+                <ul class="stack-list">
+                    {% for item in result.suggestions %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="card full-width">
+                <h2>AI Feedback</h2>
+                <div class="ai-box">
+                    <pre>{{ result.ai_feedback }}</pre>
+                </div>
+            </article>
+        </section>
+
+        <div class="actions">
+            <a href="/" class="liquid-btn">
+    <span>Analyze Another Resume</span>
+</a>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
